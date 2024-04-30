@@ -2,10 +2,6 @@ import { Application, Assets } from 'pixi.js';
 import { Controller } from './Controller.js';
 import { Player } from './Player.js';
 
-// Map keyboard key codes to controller's state keys
-
-
-
 // Asynchronous IIFE
 (async () =>
 {
@@ -18,8 +14,6 @@ import { Player } from './Player.js';
     // Then adding the application's canvas to the DOM body.
     document.body.appendChild(app.canvas);
 
-    // Load the bunny texture.
-    // const texture = await Assets.load('https://pixijs.com/assets/bunny.png');
     const texture = await Assets.load('./player.png');
 
     // Create a new Sprite from an image path.
@@ -27,10 +21,10 @@ import { Player } from './Player.js';
     const player = new Player(texture, app);
     app.stage.addChild(player.sprite);
 
-    const controller = new Controller();  // Assurez-vous que `Controller` est bien défini.
+    const controller = new Controller();
 
     // Add an animation loop callback to the application's ticker.
-    app.ticker.add((deltaTime) => {
-        player.update(controller, deltaTime);
+    app.ticker.add((time) => {
+        player.update(controller, time.deltaTime);
     });
 })();
