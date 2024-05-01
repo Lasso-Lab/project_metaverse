@@ -1,0 +1,37 @@
+services:
+  front-end:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - "node_modules:/app/node_modules"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8080
+    develop:
+      watch:
+        - action: sync
+          path: ./front-end
+          target: /app
+          ignore:
+            - ./frontend/node_modules
+        - action: rebuild
+          path: ./front-end/package.json
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - "go_cache:/root/.cache/go-build"
+    develop:
+      watch:
+        - action: rebuild
+          path: ./api
+
+volumes:
+  node_modules:
+  go_cache:
