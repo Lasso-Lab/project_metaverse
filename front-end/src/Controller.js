@@ -10,10 +10,8 @@ const keyMap = {
     ArrowRight: 'right',
 };
 
-export class Controller
-{
-    constructor()
-    {
+export class Controller {
+    constructor() {
         // The controller's state.
         this.keys = {
             up: { pressed: false, doubleTap: false, timestamp: 0 },
@@ -28,8 +26,7 @@ export class Controller
         window.addEventListener('keyup', (event) => this.keyupHandler(event));
     }
 
-    keydownHandler(event)
-    {
+    keydownHandler(event) {
         const key = keyMap[event.code];
 
         if (!key) return;
@@ -49,8 +46,7 @@ export class Controller
         this.keys[key].timestamp = now;
     }
 
-    keyupHandler(event)
-    {
+    keyupHandler(event) {
         const key = keyMap[event.code];
 
         if (!key) return;
@@ -64,3 +60,4 @@ export class Controller
         if (this.keys[key].doubleTap) this.keys[key].doubleTap = false;
     }
 }
+
