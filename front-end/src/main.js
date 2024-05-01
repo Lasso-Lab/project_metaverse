@@ -1,5 +1,3 @@
-import { Application, Assets, Graphics } from 'pixi.js';
-
 import { Renderer } from './Renderer.js';
 import { Client } from './Client.js';
 
@@ -16,11 +14,17 @@ import { Client } from './Client.js';
     const button = document.getElementById("login")
 
     button.addEventListener(
-    "click",
-    () => {
-        client.onConnect(usernameInput.value)
-    }
+        "click",
+        () => {
+            client.onConnect(usernameInput.value)
+        }
     )
-
+    
+    // Send the position every 5 second
+    setInterval(() => {
+        let {x, y} = renderer.getHostPosition();
+        client.sendPosition(x, y);
+    }, 10);
+    
     renderer.render();
 })();

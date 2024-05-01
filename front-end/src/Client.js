@@ -1,18 +1,32 @@
-const BASE_URL = "http://localhost:8081"
+const BASE_URL = "http://localhost:8080"
 
 export class Client {
     constructor(renderer) {
         this.username;
         this.players = {};
         this.renderer = renderer;
+        this.dataChannel = null;
+        this.isDataChannelOpen = false;
     }
     
     updatePlayer(username, x, y) {
+        if (!this.players[username]) {
+            this.renderer.addPlayer(username);
+        }
+
         this.players[username] = { x, y };
+        this.renderer.updatePlayer(username, x, y);
+    }
+
+    sendPosition(x, y) {
+        if (this.dataChannel && this.isDataChannelOpen) {
+            this.dataChannel.send(`${x}|${y}`)
+        }
     }
 
     onConnect(username) {
         this.username = username;
+        this.players[username] = { x: 0, y: 0 }
 
         // Create the WebRTC offer
         const peerConnection = new RTCPeerConnection()
@@ -21,11 +35,14 @@ export class Client {
         dataChannel.onopen = () => {
           console.log("Data channel is open")
           this.renderer.setHost(this.username)
+          this.renderer.addPlayer(this.username)
+          this.isDataChannelOpen = true
         }
 
         dataChannel.onmessage = (event) => {
-          console.log("Message received : ", event.data)
-          const [username, x, y] = event.data.split("|")
+          let [username, x, y] = event.data.split("|")
+          x = parseInt(x)
+          y = parseInt(y)
           this.updatePlayer(username, x, y)
         }
 

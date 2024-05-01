@@ -1,6 +1,6 @@
 import { Application } from 'pixi.js';
 
-import { Controller } from './Systems/Controller.js';
+import { Controller } from './Controller.js';
 import { Player } from './Player.js';
 
 export class Renderer {
@@ -19,10 +19,10 @@ export class Renderer {
     addPlayer(username) {
         if (username === this.host) {
             const controller = new Controller();
-            const player = new Player(null, null, this.app, username, this.players.size(), controller);
+            const player = new Player(null, null, this.app, username, Object.keys(this.players).length, controller);
             this.players[username] = player;
         } else {
-            const player = new Player(null, null, this.app, username, this.players.size(), null);
+            const player = new Player(null, null, this.app, username, Object.keys(this.players).length, null);
             this.players[username] = player;
         }
     }
@@ -33,6 +33,9 @@ export class Renderer {
     }
 
     getHostPosition() {
+        if (this.host === null || this.players === null || this.players[this.host] === null) {
+            return { x: 0, y: 0 };
+        }
         return this.players[this.host].getPosition();
     }
 
@@ -40,11 +43,10 @@ export class Renderer {
         this.host = username;
     }
 
-    setPositions(positions) {
-        for (const [username, position] of Object.entries(positions)) {
-            this.players[username].setPosition(position);
-        }
+    updatePlayer(username, x, y) {
+        this.players[username]?.setPosition(x, y);
     }
+
 
     render() {
         this.app.ticker.add((time) => {

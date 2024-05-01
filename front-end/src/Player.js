@@ -18,13 +18,11 @@ export class Player {
             this.shape = new Graphics().circle(0, 0, 16).fill({ color: randomColor }).stroke({ color: 0x111111, alpha: 0.87, width: 1 });
         }
 
-
-        
         this.app = app;
 
-        this.pseudoText = new Text(pseudo ?? 'Player ' + id, { fontFamily: 'Arial', fontSize: 12, fill: 0xffffff, align: 'center' });
-        this.pseudoText.anchor.set(0.5);
-        app.stage.addChild(this.pseudoText);
+        this.username = new Text(pseudo ?? 'Player ' + id, { fontFamily: 'Arial', fontSize: 12, fill: 0xffffff, align: 'center' });
+        this.username.anchor.set(0.5);
+        app.stage.addChild(this.username);
 
         if (this.sprite) {
             this.sprite.anchor.set(0.5);
@@ -42,7 +40,7 @@ export class Player {
         // Set initial properties for rotation and movement speed
         this.rotationSpeed = 0.1;
         this.speed = 30;
-        this.this.controller = controller;
+        this.controller = controller;
     }
 
     /**
@@ -50,8 +48,6 @@ export class Player {
      * @param {number} deltaTime
      */
     update(deltaTime) {
-
-
         if (!this.controller)
             return;
         
@@ -68,8 +64,8 @@ export class Player {
             this.sprite.x += (this.controller.keys.right.pressed - this.controller.keys.left.pressed) * this.speed * deltaTime;
             this.sprite.y += (this.controller.keys.down.pressed - this.controller.keys.up.pressed) * this.speed * deltaTime;
 
-            this.pseudoText.x = this.sprite.x;
-            this.pseudoText.y = this.sprite.y - 32;
+            this.username.x = this.sprite.x;
+            this.username.y = this.sprite.y - 32;
         }
 
         // also move the shape
@@ -77,25 +73,40 @@ export class Player {
             this.shape.x += (this.controller.keys.right.pressed - this.controller.keys.left.pressed) * this.speed * deltaTime;
             this.shape.y += (this.controller.keys.down.pressed - this.controller.keys.up.pressed) * this.speed * deltaTime;
 
-            this.pseudoText.x = this.shape.x;
-            this.pseudoText.y = this.shape.y - 32;
         }
     }
 
+
     getPosition() {
-        return {
-            x: this.sprite.x,
-            y: this.sprite.y
-        }
+        if (this.sprite) {
+            return {
+                x: this.sprite.x,
+                y: this.sprite.y
+            }
+        } else if (this.shape) {
+            return {
+                x: this.shape.x,
+                y: this.shape.y
+            }
+        } else {
+            return {
+                x: 0,
+                y: 0
+            }
+        } 
     }
 
     setPosition(x, y) {
-        this.sprite.x = x;
-        this.sprite.y = y;
-    }
-
-    setPseudo(pseudo) {
-        this.pseudoText.text = pseudo;
+        this.username.x = x;
+        this.username.y = y - 32;
+        if (this.sprite) {
+            this.sprite.x = x;
+            this.sprite.y = y;
+        }
+        if (this.shape) {
+            this.shape.x = x;
+            this.shape.y = y;
+        }
     }
 
     destroy() {
@@ -105,7 +116,7 @@ export class Player {
         if (this.shape) {
             this.app.stage.removeChild(this.shape);
         }
-        this.app.stage.removeChild(this.pseudoText);
+        this.app.stage.removeChild(this.username);
     }
 
 }
