@@ -27,10 +27,21 @@ services:
       - "8080:8080"
     volumes:
       - "go_cache:/root/.cache/go-build"
+    environment:
+      - STUN_TURN_URL=turn:coturn:3478
+      - STUN_TURN_USERNAME=base
+      - STUN_TURN_CREDENTIAL=base
     develop:
       watch:
         - action: rebuild
           path: ./api
+
+  coturn:
+    image: coturn/coturn
+    volumes:
+      - "./turnserver.conf:/etc/coturn/turnserver.conf"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   node_modules:
