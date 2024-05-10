@@ -126,12 +126,28 @@ type AuthRequest struct {
 }
 
 func main() {
-	config := webrtc.Configuration{
-		ICEServers: []webrtc.ICEServer{
-			{
-				URLs: []string{"stun:stun.l.google.com:19302"},
-			},
+	iceServers := []webrtc.ICEServer{
+		{
+			URLs: []string{"stun:stun.l.google.com:19302"},
 		},
+	}
+
+	stunTurnURL := os.Getenv("STUN_TURN_URL")
+	stunTurnUsername := os.Getenv("STUN_TURN_USERNAME")
+	stunTurnCredential := os.Getenv("STUN_TURN_CREDENTIAL")
+	stunTurnCredentialType := webrtc.ICECredentialTypePassword
+
+	if stunTurnURL != "" {
+		iceServers = append(iceServers, webrtc.ICEServer{
+			URLs:           []string{stunTurnURL},
+			Username:       stunTurnUsername,
+			Credential:     stunTurnCredential,
+			CredentialType: stunTurnCredentialType,
+		})
+	}
+
+	config := webrtc.Configuration{
+		ICEServers: iceServers,
 	}
 
 	gs := newGameServer()
