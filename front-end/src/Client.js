@@ -1,4 +1,7 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
+const STUN_TURN_URL = import.meta.env.VITE_STUN_TURN_URL
+const STUN_TURN_USERNAME = import.meta.env.VITE_STUN_TURN_USERNAME
+const STUN_TURN_CREDENTIAL = import.meta.env.VITE_STUN_TURN_CREDENTIAL
 
 export class Client {
     constructor(renderer) {
@@ -29,7 +32,20 @@ export class Client {
         this.players[username] = { x: 0, y: 0 }
 
         // Create the WebRTC offer
-        const peerConnection = new RTCPeerConnection()
+        const peerConnection = new RTCPeerConnection(
+          {
+            iceServers: [
+              {
+                urls: "stun:stun.l.google.com:19302"
+              },
+              {
+                urls: STUN_TURN_URL,
+                username: STUN_TURN_USERNAME,
+                credential: STUN_TURN_CREDENTIAL
+              }
+            ]
+          }
+        )
         const dataChannel = peerConnection.createDataChannel("position")
 
         dataChannel.onopen = () => {
