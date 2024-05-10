@@ -61,25 +61,28 @@ func (gs *GameServer) createPeerConnection(username string, offer webrtc.Session
 	})
 
 	peerConnection.OnDataChannel(func(d *webrtc.DataChannel) {
-		d.OnOpen(func() {
-			if d.Label() == "position" {
+		switch d.Label() {
+		case "position":
+			d.OnOpen(func() {
 				gs.addPlayer(username, peerConnection, d)
-			}
-		})
+			})
 
-		d.OnMessage(func(msg webrtc.DataChannelMessage) {
-			// Broadcast the message to all other players
-			gs.playersLock.Lock()
-			defer gs.playersLock.Unlock()
+			d.OnMessage(func(msg webrtc.DataChannelMessage) {
+				// Broadcast the message to all other players
+				gs.playersLock.Lock()
+				defer gs.playersLock.Unlock()
 
-			for _, player := range gs.players {
-				err := player.DataChannel.SendText(username + "|" + string(msg.Data))
+				for _, player := range gs.players {
+					err := player.DataChannel.SendText(username + "|" + string(msg.Data))
 
-				if err != nil {
-					fmt.Println(err)
+					if err != nil {
+						fmt.Println("Error sending message to player ", player.Username, " : ", err)
+					}
 				}
-			}
-		})
+			})
+		default:
+			fmt.Println("Unknown data channel label: ", d.Label())
+		}
 	})
 
 	err = peerConnection.SetRemoteDescription(offer)
