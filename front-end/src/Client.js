@@ -5,8 +5,7 @@ export class Client {
         this.username;
         this.players = {};
         this.renderer = renderer;
-        this.dataChannel = null;
-        this.isDataChannelOpen = false;
+        this.dataChannels = {};
     }
     
     updatePlayer(username, x, y) {
@@ -19,8 +18,9 @@ export class Client {
     }
 
     sendPosition(x, y) {
-        if (this.dataChannel && this.isDataChannelOpen) {
-            this.dataChannel.send(`${x}|${y}`)
+        var dataChannel = this.dataChannels["position"]
+        if (dataChannel && dataChannel.isOpen) {
+            dataChannel.channel.send(`${x}|${y}`)
         }
     }
 
@@ -30,16 +30,16 @@ export class Client {
 
         // Create the WebRTC offer
         const peerConnection = new RTCPeerConnection()
-        const dataChannel = peerConnection.createDataChannel("position")
+        const positionDataChannel = peerConnection.createDataChannel("position")
 
-        dataChannel.onopen = () => {
-          console.log("Data channel is open")
+        positionDataChannel.onopen = () => {
+          console.log("Position data channel is open")
           this.renderer.setHost(this.username)
           this.renderer.addPlayer(this.username)
-          this.isDataChannelOpen = true
+          this.dataChannels["position"].isOpen = true
         }
 
-        dataChannel.onmessage = (event) => {
+        positionDataChannel.onmessage = (event) => {
           let [username, x, y] = event.data.split("|")
           x = parseInt(x)
           y = parseInt(y)
@@ -53,7 +53,11 @@ export class Client {
             this._sendOfferAndGetAnswer(peerConnection, offer);
           }
         )
-        this.dataChannel = dataChannel;
+
+        this.dataChannels["position"] = {
+          "channel": positionDataChannel,
+          "isOpen": false
+        }
       }
 
       async _sendOfferAndGetAnswer(peerConnection, offer) {
