@@ -30,6 +30,8 @@ export class Client {
 
         // Create the WebRTC offer
         const peerConnection = new RTCPeerConnection()
+
+        // Handle the positions
         const positionDataChannel = peerConnection.createDataChannel("position")
 
         positionDataChannel.onopen = () => {
@@ -46,6 +48,26 @@ export class Client {
           this.updatePlayer(username, x, y)
         }
 
+        // Handle the notifications
+        const notificationDataChannel = peerConnection.createDataChannel("notification")
+
+        notificationDataChannel.onopen = () => {
+          console.log("Notification data channel is open")
+          this.dataChannels["notification"].isOpen = true
+        }
+
+        notificationDataChannel.onmessage = (event) => {
+          const reader = new FileReader()
+          reader.onload = () => {
+            const text = reader.result
+            const message = JSON.parse(text)
+
+            console.log("Notification received : ", message)
+          }
+
+          reader.readAsText(event.data)
+        }
+
         peerConnection.createOffer().then(
           (offer) => {
             console.log("Offer created : ", offer);
@@ -56,6 +78,11 @@ export class Client {
 
         this.dataChannels["position"] = {
           "channel": positionDataChannel,
+          "isOpen": false
+        }
+
+        this.dataChannels["notification"] = {
+          "channel": notificationDataChannel,
           "isOpen": false
         }
       }

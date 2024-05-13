@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/pion/webrtc/v4"
 )
@@ -77,6 +78,26 @@ func (gs *GameServer) createPeerConnection(username string, offer webrtc.Session
 
 					if err != nil {
 						fmt.Println("Error sending message to player ", player.Username, " : ", err)
+					}
+				}
+			})
+		case "notification":
+			d.OnOpen(func() {
+				for range time.NewTicker(5 * time.Second).C {
+					msg := map[string]string{
+						"message": "Hello from server (JSON)",
+					}
+					b, err := json.Marshal(msg)
+
+					if err != nil {
+						fmt.Println("Error marshalling JSON: ", err)
+						return
+					}
+
+					err = d.Send(b)
+
+					if err != nil {
+						fmt.Println("Error sending message to player ", username, " : ", err)
 					}
 				}
 			})
